@@ -10,12 +10,17 @@
 /* class & function section */
 
 int main(int argc, char* argv[]) {
-	if (argc != 2) {
+	int read_flag;
+	osxtools::IBuffer ib;
+	if (argc == 1) {
+		read_flag = ib.read_from_stdin();
+	} else if (argc == 2) {
+		read_flag = ib.read_from_file(argv[1]);
+	} else {
 		std::cerr << "[usage]: shuf [file]" << std::endl;
 		return 0;
 	}
-	osxtools::IBuffer ib;
-	ib.read_from_file(argv[1]);
+
 	ib.get_meta_info();
 	ib.shuffle_meta_info();
 	ib.shuffle_buffer();

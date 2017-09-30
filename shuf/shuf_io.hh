@@ -38,14 +38,34 @@ public:
 	IBuffer& operator=(IBuffer const&) = delete;
 	~IBuffer() { _delete(_buffer); }
 
+	/* read from stdin */
+	int read_from_stdin() {
+		if (_buffer != nullptr) { return 1; }
+		std::FILE* fp = std::tmpfile();
+		if (!fp) { return 1; }
+		for (std::string line; std::getline(std::cin, line);) {
+			if (line.empty() or *(line.data()+line.length()-1) != '\n')
+				line.push_back('\n');
+			std::fputs(line.data(), fp);
+		}
+		std::rewind(fp);
+
+		fstat(fileno(fp), &_st);
+		_buffer = (char*)realloc(_buffer, sizeof(char)*_st.st_size);
+		read(fileno(fp), _buffer, _st.st_size);
+		std::fclose(fp);
+		return 0;
+	}
+
 	/* read from file */
-	void read_from_file(std::string const& fname) {
-		if (_buffer != nullptr) { return; }
+	int read_from_file(std::string const& fname) {
+		if (_buffer != nullptr) { return 1; }
 		std::FILE* fp = std::fopen(fname.c_str(), "r");
 		fstat(fileno(fp), &_st);
 		_buffer = (char*)realloc(_buffer, sizeof(char)*_st.st_size);
 		read(fileno(fp), _buffer, _st.st_size);
 		std::fclose(fp);
+		return 0;
 	}
 
 	/* get meta info */
