@@ -43,16 +43,16 @@ public:
 		if (_buffer != nullptr) { return 1; }
 		std::FILE* fp = std::tmpfile();
 		if (!fp) { return 1; }
-		for (std::string line; std::getline(std::cin, line);) {
-			if (line.empty() or *(line.data()+line.length()-1) != '\n')
-				line.push_back('\n');
-			std::fputs(line.data(), fp);
-		}
+
+		auto fn = fileno(fp);
+		int n;
+		char buf[4096];
+		while (( n = read(STDIN_FILENO, buf, 4096)) > 0) write(fn, buf, n);
 		std::rewind(fp);
 
-		fstat(fileno(fp), &_st);
+		fstat(fn, &_st);
 		_buffer = (char*)realloc(_buffer, sizeof(char)*_st.st_size);
-		read(fileno(fp), _buffer, _st.st_size);
+		read(fn, _buffer, _st.st_size);
 		std::fclose(fp);
 		return 0;
 	}
