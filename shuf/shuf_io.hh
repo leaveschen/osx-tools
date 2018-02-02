@@ -22,6 +22,8 @@
 
 namespace osxtools {
 
+constexpr size_t G_LINE_MAX_LEN = 10240;
+
 class IBuffer {
 private:
 	char* _buffer;
@@ -46,8 +48,8 @@ public:
 
 		auto fn = fileno(fp);
 		int n;
-		char buf[4096];
-		while (( n = read(STDIN_FILENO, buf, 4096)) > 0) write(fn, buf, n);
+		char buf[G_LINE_MAX_LEN];
+		while (( n = read(STDIN_FILENO, buf, G_LINE_MAX_LEN)) > 0) write(fn, buf, n);
 		std::rewind(fp);
 
 		fstat(fn, &_st);
@@ -77,7 +79,7 @@ public:
 			 *  then call c style memchr to search '\n'(10), efficiency
 			 */
 			pos_begin = pos;
-			curr = (char*)memchr(curr, 10, 1024);
+			curr = (char*)memchr(curr, 10, G_LINE_MAX_LEN);
 			pos = (size_t)(curr - _buffer);
 			if (pos >= _st.st_size) break;
 			_meta.push_back({pos_begin, pos-pos_begin+1});
